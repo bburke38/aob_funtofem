@@ -1,0 +1,235 @@
+# Aeroelastic Optimization Benchmark model geometry script
+# Written by Brian J. Burke
+
+cfgpmtr view:flow 1
+cfgpmtr view:struct 0
+
+set mirror 0
+# I have not built support for mirroring when using Kulfan.
+
+cfgpmtr nribs 23
+cfgpmtr nspars 2
+
+set cfd:wakeSheet 0
+set cfd:sharpTE 0   
+# cfd:sharpTE doesn't do anything, just keeping it here so I can pass it to 
+# not break other stuff. Finite TE is now set through the ztail parameters.
+
+cfgpmtr xFarfield 500
+
+## DESIGN PARAMETERS
+# ---------------------------------
+# General wing and airfoil parameters
+despmtr rootChord 5.0   # Root chord length
+despmtr tipChord 1.5    # Tip chord length
+despmtr halfSpan 14.0   # Half span length (y direction)
+despmtr tipOffset 7.5   # Tip offset in x direction
+
+## Kulfan airfoil parameters and geometric twist
+# Five stations plus the root are prescribed to determine the wing shape.
+# At each station, four coefficients are used for the upper and lower surface
+# each for the Kulfan airfoil.
+# *-------- KULFAN PARAMETERS --------*
+# Root (not active in the design, set as configuration parameters)
+cfgpmtr st0_N1 0.5
+cfgpmtr st0_N2 1.0
+cfgpmtr st0_ztail1 0.005
+cfgpmtr st0_ztail2 -0.005
+cfgpmtr st0_aupper1 0.126479
+cfgpmtr st0_aupper2 0.157411
+cfgpmtr st0_aupper3 0.188344
+cfgpmtr st0_aupper4 0.219277
+cfgpmtr st0_alower1 -0.158923
+cfgpmtr st0_alower2 -0.137404
+cfgpmtr st0_alower3 -0.115885
+cfgpmtr st0_alower4 0.094366
+
+# Station 1 Airfoil
+despmtr st1_N1 0.5
+despmtr st1_N2 1.0
+despmtr st1_ztail1 0.005
+despmtr st1_ztail2 -0.005
+despmtr st1_aupper1 0.126479
+despmtr st1_aupper2 0.157411
+despmtr st1_aupper3 0.188344
+despmtr st1_aupper4 0.219277
+despmtr st1_alower1 -0.158923
+despmtr st1_alower2 -0.137404
+despmtr st1_alower3 -0.115885
+despmtr st1_alower4 0.094366
+
+despmtr st2_N1 0.5
+despmtr st2_N2 1.0
+despmtr st2_ztail1 0.005
+despmtr st2_ztail2 -0.005
+despmtr st2_aupper1 0.126479
+despmtr st2_aupper2 0.157411
+despmtr st2_aupper3 0.188344
+despmtr st2_aupper4 0.219277
+despmtr st2_alower1 -0.158923
+despmtr st2_alower2 -0.137404
+despmtr st2_alower3 -0.115885
+despmtr st2_alower4 0.094366
+
+despmtr st3_N1 0.5
+despmtr st3_N2 1.0
+despmtr st3_ztail1 0.005
+despmtr st3_ztail2 -0.005
+despmtr st3_aupper1 0.126479
+despmtr st3_aupper2 0.157411
+despmtr st3_aupper3 0.188344
+despmtr st3_aupper4 0.219277
+despmtr st3_alower1 -0.158923
+despmtr st3_alower2 -0.137404
+despmtr st3_alower3 -0.115885
+despmtr st3_alower4 0.094366
+
+despmtr st4_N1 0.5
+despmtr st4_N2 1.0
+despmtr st4_ztail1 0.005
+despmtr st4_ztail2 -0.005
+despmtr st4_aupper1 0.126479
+despmtr st4_aupper2 0.157411
+despmtr st4_aupper3 0.188344
+despmtr st4_aupper4 0.219277
+despmtr st4_alower1 -0.158923
+despmtr st4_alower2 -0.137404
+despmtr st4_alower3 -0.115885
+despmtr st4_alower4 0.094366
+
+despmtr st5_N1 0.5
+despmtr st5_N2 1.0
+despmtr st5_ztail1 0.005
+despmtr st5_ztail2 -0.005
+despmtr st5_aupper1 0.126479
+despmtr st5_aupper2 0.157411
+despmtr st5_aupper3 0.188344
+despmtr st5_aupper4 0.219277
+despmtr st5_alower1 -0.158923
+despmtr st5_alower2 -0.137404
+despmtr st5_alower3 -0.115885
+despmtr st5_alower4 0.094366
+
+# Setup twist variables
+cfgpmtr Wing:station0:alpha 0.0
+despmtr Wing:station1:alpha 0.0
+despmtr Wing:station2:alpha 0.0
+despmtr Wing:station3:alpha 0.0
+despmtr Wing:station4:alpha 0.0
+despmtr Wing:station5:alpha 0.0
+
+outpmtr boxvol 1.0
+
+# Create lists to more easily pass the variables around
+dimension Wing:station0:class 1 2 1
+dimension Wing:station0:ztail 1 2 1
+dimension Wing:station0:auppr 1 4 1
+dimension Wing:station0:alowr 1 4 1
+
+dimension Wing:station1:class 1 2 1
+dimension Wing:station1:ztail 1 2 1
+dimension Wing:station1:auppr 1 4 1
+dimension Wing:station1:alowr 1 4 1
+
+dimension Wing:station2:class 1 2 1
+dimension Wing:station2:ztail 1 2 1
+dimension Wing:station2:auppr 1 4 1
+dimension Wing:station2:alowr 1 4 1
+
+dimension Wing:station3:class 1 2 1
+dimension Wing:station3:ztail 1 2 1
+dimension Wing:station3:auppr 1 4 1
+dimension Wing:station3:alowr 1 4 1
+
+dimension Wing:station4:class 1 2 1
+dimension Wing:station4:ztail 1 2 1
+dimension Wing:station4:auppr 1 4 1
+dimension Wing:station4:alowr 1 4 1
+
+dimension Wing:station5:class 1 2 1
+dimension Wing:station5:ztail 1 2 1
+dimension Wing:station5:auppr 1 4 1
+dimension Wing:station5:alowr 1 4 1
+
+# Populate lists with design variables
+set Wing:station0:class "st0_N1; st0_N2;"
+set Wing:station0:ztail "st0_ztail1; st0_ztail2;"
+set Wing:station0:auppr "st0_aupper1; st0_aupper2; st0_aupper3; st0_aupper4;"
+set Wing:station0:alowr "st0_alower1; st0_alower2; st0_alower3; st0_alower4;"
+
+set Wing:station1:class "st1_N1; st1_N2;"
+set Wing:station1:ztail "st1_ztail1; st1_ztail2;"
+set Wing:station1:auppr "st1_aupper1; st1_aupper2; st1_aupper3; st1_aupper4;"
+set Wing:station1:alowr "st1_alower1; st1_alower2; st1_alower3; st1_alower4;"
+
+set Wing:station2:class "st2_N1; st2_N2;"
+set Wing:station2:ztail "st2_ztail1; st2_ztail2;"
+set Wing:station2:auppr "st2_aupper1; st2_aupper2; st2_aupper3; st2_aupper4;"
+set Wing:station2:alowr "st2_alower1; st2_alower2; st2_alower3; st2_alower4;"
+
+set Wing:station3:class "st3_N1; st3_N2;"
+set Wing:station3:ztail "st3_ztail1; st3_ztail2;"
+set Wing:station3:auppr "st3_aupper1; st3_aupper2; st3_aupper3; st3_aupper4;"
+set Wing:station3:alowr "st3_alower1; st3_alower2; st3_alower3; st3_alower4;"
+
+set Wing:station4:class "st3_N1; st4_N2;"
+set Wing:station4:ztail "st3_ztail1; st4_ztail2;"
+set Wing:station4:auppr "st4_aupper1; st4_aupper2; st4_aupper3; st4_aupper4;"
+set Wing:station4:alowr "st4_alower1; st4_alower2; st4_alower3; st4_alower4;"
+
+set Wing:station5:class "st5_N1; st5_N2;"
+set Wing:station5:ztail "st5_ztail1; st5_ztail2;"
+set Wing:station5:auppr "st5_aupper1; st5_aupper2; st5_aupper3; st5_aupper4;"
+set Wing:station5:alowr "st5_alower1; st5_alower2; st5_alower3; st5_alower4;"
+
+# *-------- END KULFAN PARAMETERS --------*
+
+
+# ---------------------------------
+
+ifthen view:struct EQ 1
+    # Make the structural model
+    udparg $/comps/wingBoxKulfan rootChord rootChord tipChord tipChord halfSpan halfSpan tipOffset tipOffset mirror mirror
+
+    udparg $/comps/wingBoxKulfan station0:alpha Wing:station0:alpha station0:class Wing:station0:class station0:ztail Wing:station0:ztail
+    udparg $/comps/wingBoxKulfan station0:auppr Wing:station0:auppr station0:alowr Wing:station0:alowr
+    udparg $/comps/wingBoxKulfan station1:alpha Wing:station1:alpha station1:class Wing:station1:class station1:ztail Wing:station1:ztail
+    udparg $/comps/wingBoxKulfan station1:auppr Wing:station1:auppr station1:alowr Wing:station1:alowr
+    udparg $/comps/wingBoxKulfan station2:alpha Wing:station2:alpha station2:class Wing:station2:class station2:ztail Wing:station2:ztail
+    udparg $/comps/wingBoxKulfan station2:auppr Wing:station2:auppr station2:alowr Wing:station2:alowr
+    udparg $/comps/wingBoxKulfan station3:alpha Wing:station3:alpha station3:class Wing:station3:class station3:ztail Wing:station3:ztail
+    udparg $/comps/wingBoxKulfan station3:auppr Wing:station3:auppr station3:alowr Wing:station3:alowr
+    udparg $/comps/wingBoxKulfan station4:alpha Wing:station4:alpha station4:class Wing:station4:class station4:ztail Wing:station4:ztail
+    udparg $/comps/wingBoxKulfan station4:auppr Wing:station4:auppr station4:alowr Wing:station4:alowr
+    udparg $/comps/wingBoxKulfan station5:alpha Wing:station5:alpha station5:class Wing:station5:class station5:ztail Wing:station5:ztail
+    udparg $/comps/wingBoxKulfan station5:auppr Wing:station5:auppr station5:alowr Wing:station5:alowr
+
+    udprim $/comps/wingBoxKulfan
+    set boxvol @@volume
+endif
+
+ifthen view:flow EQ 1
+    # Make the aero model
+    ifthen mirror EQ 0
+        udparg $/comps/wingAeroKulfan rootChord rootChord tipChord tipChord halfSpan halfSpan tipOffset tipOffset
+        udparg $/comps/wingAeroKulfan wakeSheet cfd:wakeSheet xFarfield xFarfield sharpTE cfd:sharpTE
+
+        udparg $/comps/wingAeroKulfan station0:alpha Wing:station0:alpha station0:class Wing:station0:class station0:ztail Wing:station0:ztail
+        udparg $/comps/wingAeroKulfan station0:auppr Wing:station0:auppr station0:alowr Wing:station0:alowr
+        udparg $/comps/wingAeroKulfan station1:alpha Wing:station1:alpha station1:class Wing:station1:class station1:ztail Wing:station1:ztail
+        udparg $/comps/wingAeroKulfan station1:auppr Wing:station1:auppr station1:alowr Wing:station1:alowr
+        udparg $/comps/wingAeroKulfan station2:alpha Wing:station2:alpha station2:class Wing:station2:class station2:ztail Wing:station2:ztail
+        udparg $/comps/wingAeroKulfan station2:auppr Wing:station2:auppr station2:alowr Wing:station2:alowr
+        udparg $/comps/wingAeroKulfan station3:alpha Wing:station3:alpha station3:class Wing:station3:class station3:ztail Wing:station3:ztail
+        udparg $/comps/wingAeroKulfan station3:auppr Wing:station3:auppr station3:alowr Wing:station3:alowr
+        udparg $/comps/wingAeroKulfan station4:alpha Wing:station4:alpha station4:class Wing:station4:class station4:ztail Wing:station4:ztail
+        udparg $/comps/wingAeroKulfan station4:auppr Wing:station4:auppr station4:alowr Wing:station4:alowr
+        udparg $/comps/wingAeroKulfan station5:alpha Wing:station5:alpha station5:class Wing:station5:class station5:ztail Wing:station5:ztail
+        udparg $/comps/wingAeroKulfan station5:auppr Wing:station5:auppr station5:alowr Wing:station5:alowr
+
+        udprim $/comps/wingAeroKulfan
+    endif
+endif
+
+end
+||||||||||

@@ -1,0 +1,44 @@
+
+#--- interface N1 in 0.5
+#--- interface N2 in 1.0
+#--- 
+#--- interface ztail1 in 0.005
+#--- interface ztail2 in -0.005
+#--- 
+#--- interface aupper1 in 0.126479
+#--- interface aupper2 in 0.157411
+#--- interface aupper3 in 0.188344
+#--- interface aupper4 in 0.219277
+#--- 
+#--- interface alower1 in -0.158923
+#--- interface alower2 in -0.137404
+#--- interface alower3 in -0.115885
+#--- interface alower4 in 0.094366
+#--- 
+#--- dimension class     1  2  1
+#--- dimension ztail     1  2  1
+#--- dimension aupper    1  6  1
+#--- dimension alower    1  6  1
+
+interface class in
+interface ztail in
+interface aupper in
+interface alower in
+
+# Make the Kulfan airfoil section
+
+udparg kulfan class class
+udparg kulfan ztail ztail
+udparg kulfan aupper aupper
+udprim kulfan alower alower
+
+select face
+attribute tagComp $kulfan
+ATTRIBUTE _color      "0.43922; 0.48235; 0.56078"
+
+rotatex 90 0 0
+
+# restore rae
+
+end
+|||||||||

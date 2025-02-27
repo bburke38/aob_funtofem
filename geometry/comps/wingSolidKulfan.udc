@@ -1,0 +1,214 @@
+# Generate half-wing solid body
+
+interface rootChord in 5.0
+interface tipChord in 1.5
+interface halfSpan in 14.0
+interface tipOffset in 7.5
+
+interface sharpTE in 0
+
+interface station0:alpha in 0
+interface station0:class in
+interface station0:ztail in
+interface station0:auppr in
+interface station0:alowr in
+
+interface station1:alpha in 0
+interface station1:class in
+interface station1:ztail in
+interface station1:auppr in
+interface station1:alowr in
+
+interface station2:alpha in 0
+interface station2:class in
+interface station2:ztail in
+interface station2:auppr in
+interface station2:alowr in
+
+interface station3:alpha in 0
+interface station3:class in
+interface station3:ztail in
+interface station3:auppr in
+interface station3:alowr in
+
+interface station4:alpha in 0
+interface station4:class in
+interface station4:ztail in
+interface station4:auppr in
+interface station4:alowr in
+
+interface station5:alpha in 0
+interface station5:class in
+interface station5:ztail in
+interface station5:auppr in
+interface station5:alowr in
+
+set nStations 5
+
+set dcdy (tipChord-rootChord)/halfSpan
+set dxdy (tipOffset)/halfSpan
+
+mark
+
+# Make the RAE2822 airfoil section
+udprim $/airfoil sharpTE sharpTE teChop 0.03
+store baseAirfoil
+
+# Station 0 (root)
+udparg $/kulfan_airfoil class station0:class
+udparg $/kulfan_airfoil ztail station0:ztail
+udparg $/kulfan_airfoil aupper station0:auppr
+udparg $/kulfan_airfoil alower station0:alowr
+udprim $/kulfan_airfoil
+
+scale 5.0
+store rootAirfoil
+restore rootAirfoil
+
+# Station 1
+set fr 1/nStations
+set dy fr*halfSpan
+set dx dxdy*dy
+set c rootChord+dcdy*dy
+
+udparg $/kulfan_airfoil class station1:class
+udparg $/kulfan_airfoil ztail station1:ztail
+udparg $/kulfan_airfoil aupper station1:auppr
+udparg $/kulfan_airfoil alower station1:alowr
+udprim $/kulfan_airfoil
+
+scale c
+rotatey -station1:alpha 0 0
+translate dx dy 0
+
+# Station 2
+set fr 2/nStations
+set dy fr*halfSpan
+set dx dxdy*dy
+set c rootChord+dcdy*dy
+
+udparg $/kulfan_airfoil class station2:class
+udparg $/kulfan_airfoil ztail station2:ztail
+udparg $/kulfan_airfoil aupper station2:auppr
+udparg $/kulfan_airfoil alower station2:alowr
+udprim $/kulfan_airfoil
+
+scale c
+rotatey -station2:alpha 0 0
+translate dx dy 0
+
+# Station 3
+set fr 3/nStations
+set dy fr*halfSpan
+set dx dxdy*dy
+set c rootChord+dcdy*dy
+
+udparg $/kulfan_airfoil class station3:class
+udparg $/kulfan_airfoil ztail station3:ztail
+udparg $/kulfan_airfoil aupper station3:auppr
+udparg $/kulfan_airfoil alower station3:alowr
+udprim $/kulfan_airfoil
+
+scale c
+rotatey -station3:alpha 0 0
+translate dx dy 0
+
+# Station 4
+set fr 4/nStations
+set dy fr*halfSpan
+set dx dxdy*dy
+set c rootChord+dcdy*dy
+
+udparg $/kulfan_airfoil class station4:class
+udparg $/kulfan_airfoil ztail station4:ztail
+udparg $/kulfan_airfoil aupper station4:auppr
+udparg $/kulfan_airfoil alower station4:alowr
+udprim $/kulfan_airfoil
+
+scale c
+rotatey -station4:alpha 0 0
+translate dx dy 0
+
+# Station 5
+set fr 5/nStations
+set dy fr*halfSpan
+set dx dxdy*dy
+set c rootChord+dcdy*dy
+
+udparg $/kulfan_airfoil class station5:class
+udparg $/kulfan_airfoil ztail station5:ztail
+udparg $/kulfan_airfoil aupper station5:auppr
+udparg $/kulfan_airfoil alower station5:alowr
+udprim $/kulfan_airfoil
+
+scale c
+rotatey -station5:alpha 0 0
+translate dx dy 0
+
+blend 0 -1;0.75
+#blend
+  ATTRIBUTE _name       $Wing
+  ATTRIBUTE  tagComp    $Wing
+  ATTRIBUTE  capsBound  $Wing
+
+ifthen sharpTE EQ 0
+select face 1
+  attribute tagComp1 $upperSurface
+
+select face 2
+  attribute tagComp1 $lowerSurface
+
+select face 3
+  attribute tagComp1 $teSurface
+
+select face 4
+  attribute tagComp1 $rootSurface
+
+select face 5
+  attribute tagComp1 $tipSurface
+
+select edge 3
+  attribute tagEdge $leEdge
+
+select edge 1
+  attribute tagEdge $teEdge
+  attribute trailEdge $teUp
+
+select edge 6
+  attribute tagEdge $teEdge
+  attribute trailEdge $teLow
+
+select edge 8
+  attribute tagEdge $teRoot
+
+select edge 9
+  attribute tagEdge $teTip
+endif
+
+ifthen sharpTE EQ 1
+throw 999
+   select face 1
+       attribute tagComp1 $lowerSurface
+   select face 2
+     attribute tagComp1 $upperSurface
+   select face 3
+     attribute tagComp1 $rootSurface
+   select face 4
+     attribute tagComp1 $tipSurface
+   
+   select edge 1
+     attribute tagEdge $leEdge
+   select edge 2
+     attribute tagEdge $rootLow
+   select edge 3
+     attribute tagEdge $teEdge
+   select edge 4
+     attribute tagEdge $tipLow
+   select edge 5
+     attribute tagEdge $rootUp
+   select edge 6
+     attribute tagEdge $tipUp
+endif
+
+end
+||||||||||||||||

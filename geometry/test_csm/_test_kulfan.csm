@@ -1,0 +1,29 @@
+
+
+# Make the RAE2822 airfoil section
+udprim $/../comps/airfoil
+
+translate 0.0 0.1 0.0
+
+
+# Kulfan
+
+dimension class     1  2  1
+dimension ztail     1  2  1
+dimension aupper    1  5  1
+dimension alower    1  5  1
+
+set   class     "0.5;    1.0;   "
+set   ztail     "0.005; -0.005;"
+set   aupper    "0.126479; 0.149678; 0.172878; 0.196077; 0.219277;"
+set   alower    "-0.158923; -0.142784; -0.126644; -0.110505; 0.094366;"
+
+udparg $/../comps/kulfan_airfoil class class
+udparg $/../comps/kulfan_airfoil ztail ztail
+udparg $/../comps/kulfan_airfoil aupper aupper
+udprim $/../comps/kulfan_airfoil alower alower
+#udprim $/../comps/kulfan_airfoil
+
+end
+|
+|||||||||||||

@@ -1,0 +1,288 @@
+# Generate wing structural component
+
+interface rootChord in 5.0
+interface tipChord in 1.5
+interface halfSpan in 14.0
+interface tipOffset in 7.5
+
+interface mirror in 0
+
+interface station0:alpha in 0
+interface station0:class in
+interface station0:ztail in
+interface station0:auppr in
+interface station0:alowr in
+
+interface station1:alpha in 0
+interface station1:class in
+interface station1:ztail in
+interface station1:auppr in
+interface station1:alowr in
+
+interface station2:alpha in 0
+interface station2:class in
+interface station2:ztail in
+interface station2:auppr in
+interface station2:alowr in
+
+interface station3:alpha in 0
+interface station3:class in
+interface station3:ztail in
+interface station3:auppr in
+interface station3:alowr in
+
+interface station4:alpha in 0
+interface station4:class in
+interface station4:ztail in
+interface station4:auppr in
+interface station4:alowr in
+
+interface station5:alpha in 0
+interface station5:class in
+interface station5:ztail in
+interface station5:auppr in
+interface station5:alowr in
+
+interface volume out 0 # volume
+
+set nRibsInner 4
+set nRibsOuter 19
+
+set rootx1 1.497
+set rootx2 3.810
+
+set tipx1 7.725
+set tipx2 8.475
+
+set z_low -2
+set dz 4
+
+set ySOB 1.5
+set tol 0.5
+
+set dcdy (tipChord-rootChord)/halfSpan
+set dxdy (tipOffset)/halfSpan
+
+set boxRootL rootx2-rootx1
+set tipL tipx2-tipx1
+set xFar 20
+
+# Make the half wing solid
+udparg $/wingSolidKulfan rootChord rootChord tipChord tipChord halfSpan halfSpan
+udparg $/wingSolidKulfan tipOffset tipOffset sharpTE 0
+
+udparg $/wingSolidKulfan station0:alpha station0:alpha station0:class station0:class station0:ztail station0:ztail
+udparg $/wingSolidKulfan station0:auppr station0:auppr station0:alowr station0:alowr
+
+udparg $/wingSolidKulfan station1:alpha station1:alpha station1:class station1:class station1:ztail station1:ztail
+udparg $/wingSolidKulfan station1:auppr station1:auppr station1:alowr station1:alowr
+
+udparg $/wingSolidKulfan station2:alpha station2:alpha station2:class station2:class station2:ztail station2:ztail
+udparg $/wingSolidKulfan station2:auppr station2:auppr station2:alowr station2:alowr
+
+udparg $/wingSolidKulfan station3:alpha station3:alpha station3:class station3:class station3:ztail station3:ztail
+udparg $/wingSolidKulfan station3:auppr station3:auppr station3:alowr station3:alowr
+
+udparg $/wingSolidKulfan station4:alpha station4:alpha station4:class station4:class station4:ztail station4:ztail
+udparg $/wingSolidKulfan station4:auppr station4:auppr station4:alowr station4:alowr
+
+udparg $/wingSolidKulfan station5:alpha station5:alpha station5:class station5:class station5:ztail station5:ztail
+udparg $/wingSolidKulfan station5:auppr station5:auppr station5:alowr station5:alowr
+
+udprim $/wingSolidKulfan
+store wingSolid
+
+mark
+# Root rib
+box rootx1 0 z_low boxRootL 0 dz
+
+# SOB rib
+box rootx1 ySOB z_low boxRootL 0 dz
+
+# Tip rib
+box tipx1 halfSpan z_low tipL 0 dz
+
+rule 0
+restore wingSolid
+intersect
+set volume @volume
+select face 1
+   attribute capsMesh $spar
+   attribute tagComp $sparTE
+   attribute tagComp1 $sparTEin
+select face 3
+   attribute capsMesh $spar
+   attribute tagComp $sparTE
+   attribute tagComp1 $sparTEout
+select face 7
+   attribute capsMesh $spar
+   attribute tagComp $sparLE
+   attribute tagComp1 $sparLEout
+select face 8
+   attribute capsMesh $spar
+   attribute tagComp $sparLE
+   attribute tagComp1 $sparLEin
+
+store wingBoxSolid
+
+
+patbeg irib nRibsInner-1
+   set fr (irib)/(nRibsInner-1)
+   set y_rib fr*ySOB
+   box 0 y_rib z_low xFar 0 dz
+   restore wingBoxSolid
+   intersect
+   
+   set ribNum irib+1
+   
+   select face
+     attribute capsMesh $rib
+     attribute tagComp $rib
+     attribute capsGroup $rib+ribNum
+patend
+
+patbeg irib nRibsOuter
+   set fr (irib)/(nRibsOuter)
+   set y_rib ySOB+fr*(halfSpan-ySOB)
+   box rootx1-tol y_rib z_low xFar 0 dz
+   restore wingBoxSolid
+   intersect
+   
+   set ribNum irib+nRibsInner
+   
+   select face
+     attribute capsMesh $rib
+     attribute tagComp $rib
+     attribute capsGroup $rib+ribNum
+patend
+restore wingBoxSolid
+extract 0
+
+patbeg irib nRibsInner+nRibsOuter-1
+   union
+patend
+
+select face $tagComp1 $rootSurface
+   attribute capsGroup $rib1
+   attribute capsMesh $rib
+   attribute tagComp $rib
+
+select face $capsGroup $*
+   attribute has_group $yes
+select face $capsGroup $*
+   select not
+   attribute has_group $no
+
+# first just label the Outer Mold Line (OML) + LE spaces
+# station crossing and triangle faces will be dealt with later
+udprim editAttr filename <<
+   patbeg iOML nRibsInner+nRibsOuter-1
+      # OML faces
+      FACE HAS has_group=no
+      AND HAS tagComp1=upperSurface
+      AND ADJ2FACE capsGroup=!$rib+iOML
+      AND ADJ2FACE capsGroup=!$rib+(iOML+1)
+      SET capsGroup=!$uOML+iOML
+      SET tagComp=OML
+      SET has_group=yes
+   patend
+>>
+
+udprim editAttr filename <<
+   patbeg iOML nRibsInner+nRibsOuter-1
+      # OML faces
+      FACE HAS has_group=no
+      AND HAS tagComp1=lowerSurface
+      AND ADJ2FACE capsGroup=!$rib+iOML
+      AND ADJ2FACE capsGroup=!$rib+(iOML+1)
+      SET capsGroup=!$lOML+iOML
+      SET tagComp=OML
+      SET has_group=yes
+   patend
+>>
+
+udprim editAttr filename <<
+   patbeg iLE nRibsInner+nRibsOuter-1
+      # LE spar faces
+      FACE HAS tagComp=sparLE
+      AND ADJ2FACE capsGroup=!$rib+iLE
+      AND ADJ2FACE capsGroup=!$rib+(iLE+1)
+      SET capsGroup=!$spLE+iLE
+      SET has_group=yes
+   patend
+>>
+
+udprim editAttr filename <<
+   patbeg iTE nRibsInner+nRibsOuter-1
+      # TE spar faces
+      FACE HAS tagComp=sparTE
+      AND ADJ2FACE capsGroup=!$rib+iTE
+      AND ADJ2FACE capsGroup=!$rib+(iTE+1)
+      SET capsGroup=!$spTE+iTE
+      SET has_group=yes
+   patend
+>>
+
+select face $capsGroup $rib1
+   attribute capsConstraint $root
+   attribute _color $red
+
+select face $capsGroup !$rib+nRibsInner
+   attribute tagCompFace $sob
+
+udprim editAttr filename <<
+   EDGE ADJ2FACE capsConstraint=root
+   SET capsConstraint=root
+   SET tagComp=rootEdge
+   SET capsMesh=rootEdgeMesh
+
+   NODE ADJ2EDGE capsConstraint=root
+   SET capsConstraint=root
+>>
+
+select face $capsGroup $rib4
+   attribute tagComp2 $sob
+   attribute _color $green
+
+udprim editAttr filename <<
+   EDGE ADJ2FACE tagComp2=sob
+   SET capsConstraint=sob
+
+   NODE ADJ2EDGE capsConstraint=sob
+   SET capsConstraint=sob
+>>
+
+# assign capsMesh attributes to edges and fix root constraint
+udprim editAttr filename <<
+   EDGE ADJ2FACE tagComp=rib
+   AND ADJ2FACE capsMesh=spar
+   SET capsMesh=vert
+
+   EDGE ADJ2FACE tagComp=rib
+   AND ADJ2FACE tagComp=OML
+   SET capsMesh=chord
+
+   EDGE ADJ2FACE capsMesh=spar
+   AND ADJ2FACE tagComp=OML
+   SET capsMesh=span
+>>
+
+select face $tagComp $OML
+   attribute capsLoad $OML
+
+ifthen mirror EQ 1
+   store wingBoxStar
+   restore wingBoxStar
+   mirror 0 -1 0
+
+   restore wingBoxStar
+   union
+endif
+
+select body
+   attribute capsAIM $egadsTessAIM;tacsAIM
+   attribute capsMeshLength 1.0
+
+
+end
+|

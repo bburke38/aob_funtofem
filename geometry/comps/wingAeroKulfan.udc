@@ -1,0 +1,182 @@
+# Generate half-wing aerodynamic component
+
+interface rootChord in 5.0
+interface tipChord in 1.5
+interface halfSpan in 14.0
+interface tipOffset in 7.5
+
+interface wakeSheet in 0
+interface xFarfield in 250
+interface sharpTE in 1
+
+interface station0:alpha in 0
+interface station0:class in
+interface station0:ztail in
+interface station0:auppr in
+interface station0:alowr in
+
+interface station1:alpha in 0
+interface station1:class in
+interface station1:ztail in
+interface station1:auppr in
+interface station1:alowr in
+
+interface station2:alpha in 0
+interface station2:class in
+interface station2:ztail in
+interface station2:auppr in
+interface station2:alowr in
+
+interface station3:alpha in 0
+interface station3:class in
+interface station3:ztail in
+interface station3:auppr in
+interface station3:alowr in
+
+interface station4:alpha in 0
+interface station4:class in
+interface station4:ztail in
+interface station4:auppr in
+interface station4:alowr in
+
+interface station5:alpha in 0
+interface station5:class in
+interface station5:ztail in
+interface station5:auppr in
+interface station5:alowr in
+
+# Make the full wing solid
+udparg $/wingSolidKulfan rootChord rootChord tipChord tipChord halfSpan halfSpan
+udparg $/wingSolidKulfan tipOffset tipOffset sharpTE sharpTE
+
+udparg $/wingSolidKulfan station0:alpha station0:alpha station0:class station0:class station0:ztail station0:ztail
+udparg $/wingSolidKulfan station0:auppr station0:auppr station0:alowr station0:alowr
+
+udparg $/wingSolidKulfan station1:alpha station1:alpha station1:class station1:class station1:ztail station1:ztail
+udparg $/wingSolidKulfan station1:auppr station1:auppr station1:alowr station1:alowr
+
+udparg $/wingSolidKulfan station2:alpha station2:alpha station2:class station2:class station2:ztail station2:ztail
+udparg $/wingSolidKulfan station2:auppr station2:auppr station2:alowr station2:alowr
+
+udparg $/wingSolidKulfan station3:alpha station3:alpha station3:class station3:class station3:ztail station3:ztail
+udparg $/wingSolidKulfan station3:auppr station3:auppr station3:alowr station3:alowr
+
+udparg $/wingSolidKulfan station4:alpha station4:alpha station4:class station4:class station4:ztail station4:ztail
+udparg $/wingSolidKulfan station4:auppr station4:auppr station4:alowr station4:alowr
+
+udparg $/wingSolidKulfan station5:alpha station5:alpha station5:class station5:class station5:ztail station5:ztail
+udparg $/wingSolidKulfan station5:auppr station5:auppr station5:alowr station5:alowr
+
+udprim $/wingSolidKulfan
+store wingSolid
+
+box -xFarfield 0 -xFarfield 2*xFarfield xFarfield 2*xFarfield
+select face
+  attribute tagComp $farfield
+select face 3
+  attribute tagComp $symmetry
+
+restore wingSolid
+
+subtract
+
+udprim editAttr filename <<
+  EDGE ADJ2FACE tagComp1=upperSurface
+  AND ADJ2FACE tagComp=symmetry
+  SET tagComp=rootUpperEdge
+  SET capsMesh=rootUpperEdgeMesh
+
+  EDGE ADJ2FACE tagComp1=lowerSurface
+  AND ADJ2FACE tagComp=symmetry
+  SET tagComp=rootlowerEdge
+  SET capsMesh=rootLowerEdgeMesh
+
+  EDGE ADJ2FACE tagComp1=upperSurface
+  AND ADJ2FACE tagComp1=tipSurface
+  SET tagComp=tipUpperEdge
+  SET capsMesh=tipUpperEdgeMesh
+
+  EDGE ADJ2FACE tagComp1=lowerSurface
+  AND ADJ2FACE tagComp1=tipSurface
+  SET tagComp=tiplowerEdge
+  SET capsMesh=tipLowerEdgeMesh
+
+  EDGE ADJ2FACE tagComp=farfield
+  SET tagComp=farfieldEdge
+  SET capsMesh=farfieldEdgeMesh
+>>
+
+ifthen sharpTE EQ 0
+  udprim editAttr filename <<
+    EDGE ADJ2FACE tagComp=symmetry
+    AND ADJ2FACE tagComp1=teSurface
+    SET tagComp=rootTrailEdge
+    SET capsMesh=rootTrailEdgeMesh
+  >>
+
+  select face $tagComp1 $teSurface
+    attribute capsMesh $teSurfaceMesh
+    attribute capsGroup $wing
+    attribute AFLR4_CMP_ID 1
+    attribute AFLR_GBC $-STD_UG3_GBC
+endif
+
+select face $tagComp1 $tipSurface
+  attribute capsMesh $tipMesh
+  attribute capsGroup $wing
+  attribute AFLR4_CMP_ID 1
+  attribute AFLR_GBC $-STD_UG3_GBC
+
+select face $tagComp1 $upperSurface
+select add $tagComp1 $lowerSurface
+  attribute capsMesh $wingMesh
+  attribute capsGroup $wing
+  attribute AFLR4_CMP_ID 1
+  attribute AFLR_GBC $-STD_UG3_GBC
+
+select face $tagComp $farfield
+  attribute capsMesh $farfieldMesh
+  attribute capsGroup $farfield
+  attribute AFLR_GBC $FARFIELD_UG3_GBC
+  attribute AFLR4_CMP_ID 3
+  attribute AFLR4_Scale_Factor 10.0
+
+select face $tagComp $symmetry
+  attribute capsMesh $symmetryMesh
+  attribute capsGroup $symmetry
+  attribute AFLR4_CMP_ID 2
+  attribute AFLR_GBC $BL_INT_UG3_GBC
+
+select edge $tagEdge $teEdge
+  attribute capsMesh $teHorizEdgeMesh
+
+select edge $tagEdge $leEdge
+  attribute capsMesh $leEdgeMesh
+
+ifthen sharpTE EQ 0
+  select edge $tagEdge $teTip
+    attribute capsMesh $teTipCurvEdgeMesh
+endif
+
+box tipOffset halfSpan -5.0 5.0 0.0 10.0
+subtract
+
+udprim editAttr filename <<
+  EDGE ADJ2FACE tagComp1=teSurface
+  AND ADJ2EDGE tagComp=tipUpperEdge
+  SET tagComp=teTipEdge
+  SET capsMesh=teTipEdgeMesh
+>>
+
+select edge $trailEdge $teUp
+  attribute capsMesh $teHorizEdgeMeshUp
+
+select edge $trailEdge $teLow
+  attribute capsMesh $teHorizEdgeMeshBot
+
+select body
+  attribute capsAIM $fun3dAIM;aflr3AIM;egadsTessAIM;aflr4AIM
+  attribute capsMeshLength 1.0
+
+end
+|||||||||

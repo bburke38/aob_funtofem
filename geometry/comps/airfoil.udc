@@ -1,0 +1,19 @@
+interface sharpTE in 1
+interface teChop in 0.02
+
+# Make the RAE2822 airfoil section
+ifthen sharpTE EQ 1
+    udprim $/fitCurve1
+    rotatex 90 0 0
+
+else
+    udprim $/fitCurve1
+    rotatex 90 0 0
+    store baseAirfoil
+    restore baseAirfoil
+    box 1-teChop -0.1 -1 1 0.2 2
+    subtract
+endif
+
+end
+|||
