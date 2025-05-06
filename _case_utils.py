@@ -404,6 +404,26 @@ def create_pullup_turb_scenario(
     min_adjoint_steps=10,
     early_stopping=True,
 ):
+    """
+    Create FUNtoFEM Scenario for pullup flight point with RANS CFD.
+
+    Uses `cfd/pullup_turb`
+
+    Parameters
+    ----------
+    * `steps`: number of outer coupling iterations in forward solve
+    * `forward_coupling_freq`: number of CFD iterations between outer coupling iterations
+    * `adjoint_steps`: number of outer coupling iterations in adjoint solve
+    * `adjoint_coupling_freq`: number of CFD iterations between outer coupling iterations
+        in adjoint solve
+    * `min_forward_steps`: minimum outer coupling steps before forward solve can be terminated by `early_stopping`
+    * `min_adjoint_steps`: minimum outer coupling steps before adjoint solve can be terminated by `early_stopping`
+    * `early_stopping`: whether to enable early stopping based on convergence criteria
+
+    Returns
+    -------
+    * `pullup`: FUNtoFEM scenario
+    """
     pullup = _create_generic_scenario(
         "pullup_turb",
         steps=steps,
@@ -430,6 +450,26 @@ def create_pullup_inviscid_scenario(
     min_adjoint_steps=10,
     early_stopping=True,
 ):
+    """
+    Create FUNtoFEM Scenario for pullup flight point with Euler CFD.
+
+    Uses `cfd/pullup_inviscid`
+
+    Parameters
+    ----------
+    * `steps`: number of outer coupling iterations in forward solve
+    * `forward_coupling_freq`: number of CFD iterations between outer coupling iterations
+    * `adjoint_steps`: number of outer coupling iterations in adjoint solve
+    * `adjoint_coupling_freq`: number of CFD iterations between outer coupling iterations
+        in adjoint solve
+    * `min_forward_steps`: minimum outer coupling steps before forward solve can be terminated by `early_stopping`
+    * `min_adjoint_steps`: minimum outer coupling steps before adjoint solve can be terminated by `early_stopping`
+    * `early_stopping`: whether to enable early stopping based on convergence criteria
+
+    Returns
+    -------
+    * `pullup`: FUNtoFEM scenario
+    """
     pullup = _create_generic_scenario(
         "pullup_inviscid",
         steps=steps,
@@ -448,6 +488,20 @@ def create_pullup_inviscid_scenario(
 
 
 def create_pullup_turb_functions(pullup: Scenario):
+    """
+    Create functions for the `pullup_turb` scenario.
+
+    Parameters
+    ----------
+    * `pullup`: pullup FUNtoFEM scenario
+
+    Returns
+    -------
+    * `clift`: lift coefficient for half wing
+    * `pullup_ks`: KS failure function
+    * `mass_wingbox`: mass of half the wingbox (kg)
+    * `aoa_pullup`: angle of attack (degrees)
+    """
     clift = Function.lift(body=0).register_to(pullup)
     pullup_ks = (
         Function.ksfailure(ks_weight=10.0, safety_factor=1.5)
@@ -479,6 +533,26 @@ def create_pushdown_turb_scenario(
     min_adjoint_steps=10,
     early_stopping=True,
 ):
+    """
+    Create FUNtoFEM Scenario for pushdown flight point with RANS CFD.
+
+    Uses `cfd/pushdown_turb`
+
+    Parameters
+    ----------
+    * `steps`: number of outer coupling iterations in forward solve
+    * `forward_coupling_freq`: number of CFD iterations between outer coupling iterations
+    * `adjoint_steps`: number of outer coupling iterations in adjoint solve
+    * `adjoint_coupling_freq`: number of CFD iterations between outer coupling iterations
+        in adjoint solve
+    * `min_forward_steps`: minimum outer coupling steps before forward solve can be terminated by `early_stopping`
+    * `min_adjoint_steps`: minimum outer coupling steps before adjoint solve can be terminated by `early_stopping`
+    * `early_stopping`: whether to enable early stopping based on convergence criteria
+
+    Returns
+    -------
+    * `pushdown`: FUNtoFEM scenario
+    """
     pushdown = _create_generic_scenario(
         "pushdown_turb",
         steps=steps,
@@ -505,6 +579,26 @@ def create_pushdown_inviscid_scenario(
     min_adjoint_steps=10,
     early_stopping=True,
 ):
+    """
+    Create FUNtoFEM Scenario for pushdown flight point with Euler CFD.
+
+    Uses `cfd/pushdown_inviscid`
+
+    Parameters
+    ----------
+    * `steps`: number of outer coupling iterations in forward solve
+    * `forward_coupling_freq`: number of CFD iterations between outer coupling iterations
+    * `adjoint_steps`: number of outer coupling iterations in adjoint solve
+    * `adjoint_coupling_freq`: number of CFD iterations between outer coupling iterations
+        in adjoint solve
+    * `min_forward_steps`: minimum outer coupling steps before forward solve can be terminated by `early_stopping`
+    * `min_adjoint_steps`: minimum outer coupling steps before adjoint solve can be terminated by `early_stopping`
+    * `early_stopping`: whether to enable early stopping based on convergence criteria
+
+    Returns
+    -------
+    * `pushdown`: FUNtoFEM scenario
+    """
     pushdown = _create_generic_scenario(
         "pushdown_inviscid",
         steps=steps,
@@ -532,6 +626,26 @@ def _create_generic_scenario(
     min_adjoint_steps=10,
     early_stopping=True,
 ):
+    """
+    Create FUNtoFEM Scenario/
+
+    Parameters
+    ----------
+    * `scen_name`: name of the scenario to be used in FUNtoFEM.
+        NOTE: Must match the directory name inside `cfd/`
+    * `steps`: number of outer coupling iterations in forward solve
+    * `forward_coupling_freq`: number of CFD iterations between outer coupling iterations
+    * `adjoint_steps`: number of outer coupling iterations in adjoint solve
+    * `adjoint_coupling_freq`: number of CFD iterations between outer coupling iterations
+        in adjoint solve
+    * `min_forward_steps`: minimum outer coupling steps before forward solve can be terminated by `early_stopping`
+    * `min_adjoint_steps`: minimum outer coupling steps before adjoint solve can be terminated by `early_stopping`
+    * `early_stopping`: whether to enable early stopping based on convergence criteria
+
+    Returns
+    -------
+    * `scen`: FUNtoFEM scenario
+    """
     scen = Scenario.steady(
         scen_name,
         steps=steps,
@@ -555,8 +669,21 @@ def _create_generic_scenario(
 
 
 def create_pushdown_turb_functions(pushdown: Scenario):
+    """
+    Create functions for the `pushdown_turb` scenario.
+
+    Parameters
+    ----------
+    * `pullup`: pullup FUNtoFEM scenario
+
+    Returns
+    -------
+    * `clift`: lift coefficient for half wing
+    * `fail_ks`: KS failure function
+    * `aoa`: angle of attack (degrees)
+    """
     clift = Function.lift(body=0).register_to(pushdown)
-    pushdown_ks = (
+    fail_ks = (
         Function.ksfailure(ks_weight=10.0, safety_factor=1.5)
         .optimize(
             scale=1.0, upper=1.0, objective=False, plot=True, plot_name="ks-pushdown"
@@ -564,11 +691,11 @@ def create_pushdown_turb_functions(pushdown: Scenario):
         .register_to(pushdown)
     )
 
-    aoa_pushdown = pushdown.get_variable("AOA").set_bounds(
+    aoa = pushdown.get_variable("AOA").set_bounds(
         lower=-8.0, value=-5.78, upper=1.0, scale=10
     )
 
-    return clift, pushdown_ks, aoa_pushdown
+    return clift, fail_ks, aoa
 
 
 def calc_dim_aero_cruise(caero: Function):
@@ -582,6 +709,9 @@ def calc_dim_aero_cruise(caero: Function):
 
 
 def calc_full_drag_cruise(cdrag):
+    """
+    Calculate the full drag on the aircraft as the sum of the wing drag and centerbody drag.
+    """
     drag_cruise = calc_dim_aero_cruise(cdrag) + q_cruise * wing_area * cd_frame
 
     return drag_cruise
@@ -605,6 +735,20 @@ def register_fuel_burn_objective(
 def calc_fuel_burn(
     mass_wingbox: Function, lift_cruise: Function, drag_cruise: Function
 ):
+    """
+    Calculate fuel burn as the difference between take-off gross mass and landing gross
+    mass.
+
+    Parameters
+    ----------
+    * `mass_wingbox`: mass of the whole wingbox (kg)
+    * `lift_cruise`: dimensional lift of the whole wing (N)
+    * `drag_cruise`: dimensional drag of the whole wing (N)
+
+    Returns
+    -------
+    * `FB`: mass of fuel burned (kg)
+    """
     # Compute the fuel burn by take-off gross mass - landing gross mass
     LGM = calc_LGW(mass_wingbox) / 9.81
 
@@ -628,6 +772,15 @@ def calc_fuel_burn(
 def calc_mass_cruise_start(
     mass_wingbox: Function, lift_cruise: Function, drag_cruise: Function
 ):
+    """
+    Calculate mass at start of cruise (end of climb).
+
+    Parameters
+    ----------
+    * `mass_wingbox`: mass of the whole wingbox (kg)
+    * `lift_cruise`: dimensional lift of the whole wing (N)
+    * `drag_cruise`: dimensional drag of the whole wing (N)
+    """
     LGM = calc_LGW(mass_wingbox) / 9.81
 
     mass_cruise_start = LGM * CompositeFunction.exp(
@@ -640,6 +793,15 @@ def calc_mass_cruise_start(
 def calc_cruise_mass(
     mass_wingbox: Function, lift_cruise: Function, drag_cruise: Function
 ):
+    """
+    Calculate mass of aircraft at cruise point.
+
+    Parameters
+    ----------
+    * `mass_wingbox`: mass of the whole wingbox (kg)
+    * `lift_cruise`: dimensional lift of the whole wing (N)
+    * `drag_cruise`: dimensional drag of the whole wing (N)
+    """
     LGM = calc_LGW(mass_wingbox) / 9.81
 
     mass_cruise_start = calc_mass_cruise_start(mass_wingbox, lift_cruise, drag_cruise)
@@ -650,6 +812,19 @@ def calc_cruise_mass(
 
 
 def calc_LGW(mass_wingbox: Function):
+    """
+    Calculate landing gross weight.
+
+    Parameters
+    ----------
+    * `mass_wingbox`: mass of the whole wingbox (kg)
+    * `lift_cruise`: dimensional lift of the whole wing (N)
+    * `drag_cruise`: dimensional drag of the whole wing (N)
+
+    Returns
+    -------
+    * `LGW`: weight at landing (N)
+    """
     # compute est. weight of the vehicle
     mass_wing = 10.147 * mass_wingbox**0.8162  # Elham regression model
     mass_payload = 14.5e3  # kg
@@ -676,6 +851,9 @@ def calc_wing_fuel_usage(fuel_burn: Function, vol_wingbox):
 def register_dummy_constraints(
     f2f_model: FUNtoFEMmodel, clift: Function, cdrag: Function, mass_wingbox: Function
 ):
+    """
+    Register dummy constraints to the FUNtoFEM model to track throughout the analysis/optimization.
+    """
     cruise_lift = calc_dim_aero_cruise(clift)
     cruise_drag = calc_full_drag_cruise(cdrag)
     cruise_mass = calc_cruise_mass(
