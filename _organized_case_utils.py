@@ -56,14 +56,35 @@ class ProblemConstants:
 
 class ModelConstructor:
     def create_transfer_settings(npts=8000, isym=1, beta=1.0):
+        """
+        Wrapper to create TransferSettings object. This really just provides default parameters.
+        """
         return TransferSettings(npts=npts, isym=isym, beta=beta)
 
-    def create_tacs_model(comm: MPI.Intracomm, csm_path):
+    def create_tacs_model(comm: MPI.Intracomm, csm_path, num_tacs_model_procs=20):
+        """
+        Create the TACS model from caps2tacs.
+
+        Creates the mesh AIMs for the TACS model as well.
+
+        Parameters
+        ----------
+        * `comm`: global MPI communicator
+        * `csm_path`: path to the `.csm` file that contains the ESP model
+        * `num_tacs_model_procs`: number of procs to use to build the tacs_model in CAPS.
+            This is particularly useful to parallelize the sensitivity computations.
+
+        Returns
+        -------
+        * `tacs_model`: TacsModel from `caps2tacs` with `mesh_aim` defined
+        """
         tacs_model = caps2tacs.TacsModel.build(
             csm_file=csm_path,
             comm=comm,
             problem_name="capsStruct1",
-            active_procs=[iproc for iproc in range(20)],  # iproc for iproc in range(20)
+            active_procs=[
+                iproc for iproc in range(num_tacs_model_procs)
+            ],  # iproc for iproc in range(20)
             verbosity=0,
         )
         tacs_model.mesh_aim.set_mesh(  # need a refined-enough mesh for the derivative test to pass
@@ -97,6 +118,20 @@ class ModelConstructor:
         return tacs_model
 
     def create_fun3d_model_inviscid(comm: MPI.Intracomm, csm_path):
+        """
+        Create the FUN3D model from `funtofem.Fun3dModel`.
+
+        Creates the mesh AIMs for the FUN3D model as well.
+
+        Parameters
+        ----------
+        * `comm`: global MPI communicator
+        * `csm_path`: path to the `.csm` file that contains the ESP model
+
+        Returns
+        -------
+        * `my_fun3d_model`: `funtofem.Fun3dModel` with `mesh_aim` defined
+        """
         my_fun3d_model = Fun3dModel.build(
             csm_file=csm_path,
             comm=comm,
@@ -199,6 +234,20 @@ class ModelConstructor:
         return my_fun3d_model
 
     def create_fun3d_model_RANS(comm: MPI.Intracomm, csm_path):
+        """
+        Create the FUN3D model from `funtofem.Fun3dModel`.
+
+        Creates the mesh AIMs for the FUN3D model as well.
+
+        Parameters
+        ----------
+        * `comm`: global MPI communicator
+        * `csm_path`: path to the `.csm` file that contains the ESP model
+
+        Returns
+        -------
+        * `my_fun3d_model`: `funtofem.Fun3dModel` with `mesh_aim` defined
+        """
         my_fun3d_model = Fun3dModel.build(
             csm_file=csm_path,
             comm=comm,
@@ -484,7 +533,7 @@ class ModelConstructor:
 
         for icomp, comp in enumerate(consts.struct_component_groups):
             CompositeFunction.external(
-                f"{comp}-{TacsSteadyInterface.PANEL_LENGTH_CONSTR}"
+                f"{comp}-{TacsSteadyInterface.LENGTH_CONSTR}"
             ).optimize(lower=0.0, upper=0.0, scale=1.0, objective=False).register_to(
                 f2f_model
             )
@@ -839,6 +888,7 @@ class FunctionConstructor:
 
         return cruise_ks, mass_wingbox, aoa_cruise, clift, cdrag
 
+    @staticmethod
     def create_pullup_functions(pullup: Scenario):
         """
         Create functions for the `pullup_turb` scenario.

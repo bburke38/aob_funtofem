@@ -13,7 +13,9 @@ from tacs import caps2tacs
 from pyoptsparse import SNOPT, Optimization
 
 from _organized_case_utils import *
-from _gp_callback import gp_callback_generator as callback
+from _gp_callback import gp_callback_generator
+
+callback = gp_callback_generator(ProblemConstants().struct_component_groups, 40.0)
 
 hot_start = False
 store_history = True
@@ -51,6 +53,8 @@ clift_pullup, pullup_ks, mass_wingbox, aoa_pullup = FuncMaker.create_pullup_func
 
 FuncMaker.register_pullup_lift_factor(mass_wingbox, clift_pullup, f2f_model)
 
+pullup.register_to(f2f_model)
+
 ModelConstructor.register_adjacency_constraints(f2f_model)
 
 solvers = SolverManager(comm)
@@ -86,11 +90,11 @@ solvers.structural = TacsSteadyInterface.create_from_bdf(
 
 npanel_func = 0
 for ifunc, func in enumerate(f2f_model.get_functions(all=True)):
-    if TacsSteadyInterface.PANEL_LENGTH_CONSTR in func.name:
+    if TacsSteadyInterface.LENGTH_CONSTR in func.name:
         npanel_func += 1
         for ivar, var in enumerate(f2f_model.get_variables()):
             if (
-                TacsSteadyInterface.PANEL_LENGTH_CONSTR in var.name
+                TacsSteadyInterface.LENGTH_CONSTR in var.name
                 and func.name.split("-")[0] == var.name.split("-")[0]
             ):
                 true_panel_length = var.value + func.value
