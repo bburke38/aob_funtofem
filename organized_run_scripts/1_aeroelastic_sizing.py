@@ -16,6 +16,7 @@ from _organized_case_utils import *
 from _gp_callback import gp_callback_generator
 
 callback = gp_callback_generator(ProblemConstants().struct_component_groups, 40.0)
+num_tacs_procs = 20
 
 hot_start = False
 store_history = True
@@ -29,7 +30,7 @@ aitken_file = os.path.join(base_dir, "aitken-hist.txt")
 # F2F MODEL and SHAPE MODELS
 # ----------------------------------------
 f2f_model = FUNtoFEMmodel("aob-sizing")
-tacs_model = ModelConstructor.create_tacs_model(comm, csm_path)
+tacs_model = ModelConstructor.create_tacs_model(comm, csm_path, num_tacs_procs)
 f2f_model.structural = tacs_model
 
 wing = Body.aeroelastic("wing", boundary=2)
@@ -72,7 +73,7 @@ solvers.flow = Fun3d14Interface(
 solvers.structural = TacsSteadyInterface.create_from_bdf(
     model=f2f_model,
     comm=comm,
-    nprocs=8,
+    nprocs=num_tacs_procs,
     bdf_file=tacs_aim.root_dat_file,
     prefix=tacs_aim.root_analysis_dir,
     callback=callback,
@@ -119,7 +120,7 @@ design_out_file = os.path.join(base_dir, "design", "1_AE-sizing.txt")
 
 # reload previous design
 # not needed since we are hot starting
-f2f_model.read_design_variables_file(comm, design_in_file)
+# f2f_model.read_design_variables_file(comm, design_in_file)
 
 # adjust the design variable bounds about the previous design
 # i.e. tighter design space
@@ -139,7 +140,7 @@ if test_derivatives:  # test using the finite difference test
 
     # run the finite difference test
     max_rel_error = TestResult.finite_difference(
-        "fun3d+tacs-gbm",
+        "fun3d+tacs-aob",
         model=f2f_model,
         driver=f2f_driver,
         status_file="1-derivs.txt",
@@ -183,7 +184,7 @@ manager = OptimizationManager(
 )
 
 # create the pyoptsparse optimization problem
-opt_problem = Optimization("gbm-AE-sizing", manager.eval_functions)
+opt_problem = Optimization("aob-AE-sizing", manager.eval_functions)
 
 # add funtofem model variables to pyoptsparse
 manager.register_to_problem(opt_problem)

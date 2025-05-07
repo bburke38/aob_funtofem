@@ -1,7 +1,5 @@
-# aob_funtofem
+# AOB in FUNtoFEM
 Repository for Aeroelastic Optimization Benchmark implementation in FUNtoFEM.
-
-# Aeroelastic Optimization Benchmark
 
 ## Flight Conditions
 Cruise condition at 10,400 m; pull-up and push-down manuevers at sea level.
@@ -42,5 +40,7 @@ A variety of options were explored for meshing the wing, including:
 EGADS proved to be incompatible with a wake sheet since the wake sheet was not a solid body. Additional issues were encountered when trying to build a half-wing with symmetry plane, but these were overcome by reverting back to building a full solid body in ESP before handing the geometry to the meshers. Due to an inability to support multiple face normals, the boundary layer cells grown off of a sharp trailing edge invariably led to poor mesh quality near the trailing edge and subsequent poor convergence. Thus, an option for finite trailing edges was implemented in the ESP/CAPS model. 
 
 **It is recommended to use** `mesh_fun3d_egads.py` to create a viscous mesh and `mesh_fun3d_egads-euler.py` to create an Euler mesh. 
+
+The `create_dirs.sh` script will create the `cfd` directory and place scenario directories within, including their `Flow` and `Adjoint` subfolders. The names of the scenario directories are specified in the `create_dirs.sh` script in the `scenarios` array. Then copy the appropriate namelist to the `Flow` directory(ies). Also copy the `moving_body.input` file to the `Flow` directories. **NOTE:** Be mindful of the defining boundary index specified in `moving_body.input` and when creating the `wing` `funtofem.Body`.
 
 The `organize_mesh.sh` script will conveniently copy the meshes from the CAPS folder and copy them into a new `meshes` directory. It then creates symbolic links to "copy" the meshes to the respective FUN3D `Flow` folder.

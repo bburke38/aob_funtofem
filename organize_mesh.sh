@@ -8,12 +8,14 @@
 # Written by Brian J. Burke.
 
 BASE_DIR=${PWD}
-CAPS_PAR=${BASE_DIR}/geometry/capsFUNtoFEM/Scratch/aflr3
-CAPS_NAME="funtofem_CAPS"
+# CAPS_PAR=${BASE_DIR}/geometry/capsFUNtoFEM/Scratch/aflr3
+CAPS_PAR=${BASE_DIR}/geometry/capsFluidsEgads-Euler/Scratch/aflr3
+# CAPS_NAME="funtofem_CAPS"
+CAPS_NAME="aob-inviscid"
 TARGET_NAME="funtofem_CAPS"
-# FLOW_DIR=${BASE_DIR}/cfd/pullup_turb/Flow
+FLOW_DIR=${BASE_DIR}/cfd/pullup_inviscid/Flow
 # FLOW_DIR=${BASE_DIR}/cfd/pushdown_turb/Flow
-FLOW_DIR=${BASE_DIR}/cfd/cruise_turb/Flow
+# FLOW_DIR=${BASE_DIR}/cfd/cruise_turb/Flow
 
 echo "Base directory: ${BASE_DIR}"
 
