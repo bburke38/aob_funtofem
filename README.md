@@ -44,3 +44,15 @@ EGADS proved to be incompatible with a wake sheet since the wake sheet was not a
 The `create_dirs.sh` script will create the `cfd` directory and place scenario directories within, including their `Flow` and `Adjoint` subfolders. The names of the scenario directories are specified in the `create_dirs.sh` script in the `scenarios` array. Then copy the appropriate namelist to the `Flow` directory(ies). Also copy the `moving_body.input` file to the `Flow` directories. **NOTE:** Be mindful of the defining boundary index specified in `moving_body.input` and when creating the `wing` `funtofem.Body`.
 
 The `organize_mesh.sh` script will conveniently copy the meshes from the CAPS folder and copy them into a new `meshes` directory. It then creates symbolic links to "copy" the meshes to the respective FUN3D `Flow` folder.
+
+## Setup
+
+Upon copying this repository into the workspace, the first thing is to set up the `cfd` directories you will need with `create_dirs.sh`. Copy the appropriate input files from `default_nmls` to the `Flow` directory. Then make the appropriate CFD meshes by executing one of the Python scripts in `geometry`. Move the meshes by executing `organize_mesh.sh`. 
+
+**IMPORTANT:** after making the meshes, check the boundary conditions file (`.mapbc`), make sure that the boundary condition markers have their correct ID:
+-  3000: tangency (slip wall)
+-  4000: viscous wall
+-  5000: farfield
+-  6662: Y-symmetry plane
+
+Finally, either copy the run script of your choice from `organized_run_scripts` into the main directory, or set the .pbs submission script to execute the script inside the `organized_run_scripts` directory.

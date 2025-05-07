@@ -33,7 +33,7 @@ f2f_model.structural = tacs_model
 
 # BODIES and STRUCT DVs
 # ----------------------------------------
-wing = Body.aeroelastic("wing", boundary=1)
+wing = Body.aeroelastic("wing", boundary=2)
 ModelConstructor.register_struct_vars(wing, f2f_model, struct_active=False)
 wing.register_to(f2f_model)
 

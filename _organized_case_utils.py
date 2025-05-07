@@ -55,12 +55,15 @@ class ProblemConstants:
 
 
 class ModelConstructor:
+
+    @staticmethod
     def create_transfer_settings(npts=8000, isym=1, beta=1.0):
         """
         Wrapper to create TransferSettings object. This really just provides default parameters.
         """
         return TransferSettings(npts=npts, isym=isym, beta=beta)
 
+    @staticmethod
     def create_tacs_model(comm: MPI.Intracomm, csm_path, num_tacs_model_procs=20):
         """
         Create the TACS model from caps2tacs.
@@ -117,6 +120,7 @@ class ModelConstructor:
 
         return tacs_model
 
+    @staticmethod
     def create_fun3d_model_inviscid(comm: MPI.Intracomm, csm_path):
         """
         Create the FUN3D model from `funtofem.Fun3dModel`.
@@ -233,6 +237,7 @@ class ModelConstructor:
 
         return my_fun3d_model
 
+    @staticmethod
     def create_fun3d_model_RANS(comm: MPI.Intracomm, csm_path):
         """
         Create the FUN3D model from `funtofem.Fun3dModel`.
@@ -349,6 +354,7 @@ class ModelConstructor:
 
         return my_fun3d_model
 
+    @staticmethod
     def register_struct_vars(wing: Body, f2f_model: FUNtoFEMmodel, struct_active=True):
         tacs_model = f2f_model.structural
         null_material = caps2tacs.Orthotropic.null().register_to(tacs_model)
@@ -400,6 +406,7 @@ class ModelConstructor:
 
         return
 
+    @staticmethod
     def register_aero_shape_vars(wing: Body):
         consts = ProblemConstants()
         station_list = [f"st{iStation}" for iStation in range(1, consts.nStations + 1)]
@@ -465,6 +472,7 @@ class ModelConstructor:
 
         return
 
+    @staticmethod
     def register_adjacency_constraints(f2f_model: FUNtoFEMmodel):
         consts = ProblemConstants()
         variables = f2f_model.get_variables()
@@ -924,6 +932,7 @@ class FunctionConstructor:
 
         return clift, pullup_ks, mass_wingbox, aoa_pullup
 
+    @staticmethod
     def create_pushdown_functions(pushdown: Scenario):
         """
         Create functions for the `pushdown_turb` scenario.
@@ -957,6 +966,7 @@ class FunctionConstructor:
 
         return clift, fail_ks, aoa
 
+    @staticmethod
     def calc_dim_aero_cruise(caero: Function):
         """
         Convert aerodynamic coefficients for half the wing to dimensional force for entire wing.
@@ -967,6 +977,7 @@ class FunctionConstructor:
 
         return force_cruise
 
+    @staticmethod
     def calc_full_drag_cruise(cdrag):
         """
         Calculate the full drag on the aircraft as the sum of the wing drag and centerbody drag.
@@ -997,6 +1008,7 @@ class FunctionConstructor:
 
         return FB
 
+    @staticmethod
     def calc_fuel_burn(
         mass_wingbox: Function, lift_cruise: Function, drag_cruise: Function
     ):
@@ -1037,6 +1049,7 @@ class FunctionConstructor:
 
         return FB
 
+    @staticmethod
     def calc_mass_cruise_start(
         mass_wingbox: Function, lift_cruise: Function, drag_cruise: Function
     ):
@@ -1062,6 +1075,7 @@ class FunctionConstructor:
 
         return mass_cruise_start
 
+    @staticmethod
     def calc_cruise_mass(
         mass_wingbox: Function, lift_cruise: Function, drag_cruise: Function
     ):
@@ -1084,6 +1098,7 @@ class FunctionConstructor:
 
         return cruise_mass
 
+    @staticmethod
     def calc_LGW(mass_wingbox: Function):
         """
         Calculate landing gross weight.
@@ -1121,6 +1136,7 @@ class FunctionConstructor:
 
         return wing_usage
 
+    @staticmethod
     def register_dummy_constraints(
         f2f_model: FUNtoFEMmodel,
         clift: Function,
