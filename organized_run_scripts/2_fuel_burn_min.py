@@ -1,5 +1,8 @@
 """
-Optimization of the panel thicknesses.
+2_fuel_burn_min.py
+
+Run a coupled optimization to minimize fuel burn with fixed wing planform.
+Primary shape variables are wing geometric twist.
 """
 
 import time
@@ -29,36 +32,52 @@ base_dir = os.path.dirname(os.path.abspath(__file__))
 csm_path = os.path.join(base_dir, "geometry", "aob-kulfan.csm")
 aitken_file = os.path.join(base_dir, "aitken-hist.txt")
 
-# F2F MODEL and SHAPE MODELS
-# ----------------------------------------
-f2f_model = FUNtoFEMmodel("aob-sizing")
+## F2F Model and Shape Models
+# <---------------------------------------------
+f2f_model = FUNtoFEMmodel("aob-fixSpan")
 tacs_model = ModelConstructor.create_tacs_model(comm, csm_path, num_tacs_procs)
 f2f_model.structural = tacs_model
 
+tacs_aim = tacs_model.tacs_aim
+
+
+fun3d_wing_model = ModelConstructor.create_fun3d_model_inviscid(comm, csm_path)
+f2f_model.flow = fun3d_wing_model
+# --------------------------------------------->
+
+## Bodies and Aero Shape / Struct DVs
+# <---------------------------------------------
 wing = Body.aeroelastic("wing", boundary=2)
 ModelConstructor.register_struct_vars(wing, f2f_model, struct_active=True)
+ModelConstructor.register_aero_shape_vars(wing)
 wing.register_to(f2f_model)
 
-tacs_aim = tacs_model.tacs_aim
 tacs_aim.setup_aim()
 tacs_aim.pre_analysis()
+# --------------------------------------------->
 
-# Scenarios
+## Scenarios
+# <---------------------------------------------
 ScenMaker = ScenarioConstructor(constants=ProblemConstants())
-FuncMaker = FunctionConstructor
+cruise = ScenMaker.create_cruise_inviscid_scenario()
 
-pullup = ScenMaker.create_pullup_inviscid_scenario()
-# pushdown = ScenMaker.create_pushdown_inviscid_scenario()
-
-clift_pullup, pullup_ks, mass_wingbox, aoa_pullup = FuncMaker.create_pullup_functions(
-    pullup
+cruise_ks, mass_wingbox, aoa_cruise, clift, cdrag = (
+    FunctionConstructor.create_cruise_functions(cruise, f2f_model)
 )
-
-FuncMaker.register_pullup_lift_factor(mass_wingbox, clift_pullup, f2f_model)
-
-pullup.register_to(f2f_model)
+cruise_LF = FunctionConstructor.register_cruise_lift_factor(
+    mass_wingbox, clift, cdrag, f2f_model
+)
+fuel_burn = FunctionConstructor.register_fuel_burn_objective(
+    mass_wingbox, clift, cdrag, f2f_model
+)
+FunctionConstructor.register_dummy_constraints(f2f_model, clift, cdrag, mass_wingbox)
 
 ModelConstructor.register_adjacency_constraints(f2f_model)
+
+cruise.register_to(f2f_model)
+
+f2f_model.print_summary(comm)
+# --------------------------------------------->
 
 solvers = SolverManager(comm)
 solvers.flow = Fun3d14Interface(
@@ -66,10 +85,10 @@ solvers.flow = Fun3d14Interface(
     f2f_model,
     fun3d_dir="cfd",
     adjoint_options={"getgrad": True, "outer_loop_krylov": True},
-    forward_stop_tolerance=5e-13,
-    forward_min_tolerance=1e-10,  # 1e-10
-    adjoint_stop_tolerance=5e-12,
-    adjoint_min_tolerance=1e-7,
+    forward_stop_tolerance=1e-9,
+    forward_min_tolerance=1e-7,  # 1e-10
+    adjoint_stop_tolerance=1e-8,
+    adjoint_min_tolerance=1e-5,
     debug=False,
 )
 solvers.structural = TacsSteadyInterface.create_from_bdf(
@@ -107,60 +126,20 @@ for ifunc, func in enumerate(f2f_model.get_functions(all=True)):
                 # print(f"func {func.name} : lower {func.lower} upper {func.upper}")
                 break
 
-f2f_driver = FUNtoFEMnlbgs(
-    solvers=solvers,
+f2f_driver = FuntofemShapeDriver.aero_morph(
+    solvers,
+    f2f_model,
     transfer_settings=ModelConstructor.create_transfer_settings(),
-    model=f2f_model,
-    debug=False,
-    reload_funtofem_states=False,
+    struct_nprocs=num_tacs_procs,
+    struct_callback=callback,
+    tacs_inertial=True,
 )
 
 f2f_driver.print_summary(comm)
-f2f_model.print_summary(comm)
 
 # load the previous design
-design_in_file = os.path.join(base_dir, "design", "sizing.txt")
-design_out_file = os.path.join(base_dir, "design", "1_AE-sizing.txt")
-
-# reload previous design
-# not needed since we are hot starting
-# f2f_model.read_design_variables_file(comm, design_in_file)
-
-# adjust the design variable bounds about the previous design
-# i.e. tighter design space
-for var in f2f_model.get_variables():
-    if var.analysis_type == "structural":
-        var.lower = 0.67 * var.value
-        var.upper = 1.5 * var.value
-
-
-test_derivatives = False
-if test_derivatives:  # test using the finite difference test
-    # load the previous design
-    # design_in_file = os.path.join(base_dir, "design", "sizing-oneway.txt")
-    # f2f_model.read_design_variables_file(comm, design_in_file)
-
-    start_time = time.time()
-
-    # run the finite difference test
-    max_rel_error = TestResult.finite_difference(
-        "fun3d+tacs-aob",
-        model=f2f_model,
-        driver=f2f_driver,
-        status_file="1-derivs.txt",
-        epsilon=1e-4,
-        central_diff=True,
-    )
-
-    end_time = time.time()
-    dt = end_time - start_time
-    if comm.rank == 0:
-        print(f"total time for ssw derivative test is {dt} seconds", flush=True)
-        print(f"max rel error = {max_rel_error}", flush=True)
-
-    # exit before optimization
-    exit()
-
+design_in_file = os.path.join(base_dir, "design", "fuel_burn.txt")
+design_out_file = os.path.join(base_dir, "design", "2_fuel_burn.txt")
 
 # PYOPTSPARSE OPTMIZATION
 # -------------------------------------------------------------
@@ -182,13 +161,13 @@ manager = OptimizationManager(
     f2f_driver,
     design_out_file=design_out_file,
     hot_start=hot_start,
-    debug=False,
+    debug=True,
     hot_start_file=hot_start_file,
     sparse=True,
 )
 
 # create the pyoptsparse optimization problem
-opt_problem = Optimization("aob-AE-sizing", manager.eval_functions)
+opt_problem = Optimization("aob-fuel-burn", manager.eval_functions)
 
 # add funtofem model variables to pyoptsparse
 manager.register_to_problem(opt_problem)

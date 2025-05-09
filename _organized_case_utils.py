@@ -566,6 +566,7 @@ class ScenarioConstructor:
         min_forward_steps=20,
         min_adjoint_steps=10,
         early_stopping=True,
+        uncoupled_steps=100,
     ):
         """
         Create FUNtoFEM Scenario/
@@ -582,6 +583,7 @@ class ScenarioConstructor:
         * `min_forward_steps`: minimum outer coupling steps before forward solve can be terminated by `early_stopping`
         * `min_adjoint_steps`: minimum outer coupling steps before adjoint solve can be terminated by `early_stopping`
         * `early_stopping`: whether to enable early stopping based on convergence criteria
+        * `uncoupled_steps`: number of initial CFD-only steps to take before coupling
 
         Returns
         -------
@@ -593,7 +595,7 @@ class ScenarioConstructor:
             forward_coupling_frequency=forward_coupling_freq,
             adjoint_steps=adjoint_steps,
             adjoint_coupling_frequency=adjoint_coupling_freq,
-            uncoupled_steps=100,
+            uncoupled_steps=uncoupled_steps,
         )
 
         scen.set_stop_criterion(
@@ -617,6 +619,7 @@ class ScenarioConstructor:
         min_forward_steps=20,
         min_adjoint_steps=10,
         early_stopping=True,
+        uncoupled_steps=50,
     ):
         cruise = self._create_generic_scenario(
             "cruise_turb",
@@ -627,6 +630,7 @@ class ScenarioConstructor:
             min_forward_steps=min_forward_steps,
             min_adjoint_steps=min_adjoint_steps,
             early_stopping=early_stopping,
+            uncoupled_steps=uncoupled_steps,
         )
 
         cruise.set_temperature(T_ref=self.consts.T_cruise, T_inf=self.consts.T_cruise)
@@ -991,6 +995,7 @@ class FunctionConstructor:
 
         return drag_cruise
 
+    @staticmethod
     def register_fuel_burn_objective(
         mass_wingbox: Function,
         clift: Function,
